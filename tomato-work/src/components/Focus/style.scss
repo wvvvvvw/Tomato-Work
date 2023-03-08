@@ -1,0 +1,37 @@
+.focus{
+    height: 100%;
+    margin: 15px;
+    background-color: white;
+    text-align: center;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    .focus-left{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-left: 30px;
+        margin-bottom: 20px;
+        button{
+            border-radius: 20px;
+            height: 40px;
+        }
+    }
+    .focus-right{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
+        padding: 30px;
+        .focus-right-text-title{
+            font-size: 16px;
+            font-weight: bold;
+            color: #8c8c8c;
+        }
+        .focus-right-text-content{
+            font-size: 25px;
+            font-weight: bold;
+            color: #595959;
+        }
+    }
+}
