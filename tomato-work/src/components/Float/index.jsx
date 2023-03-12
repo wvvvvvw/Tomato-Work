@@ -4,10 +4,12 @@ import { ClockCircleFilled } from "@ant-design/icons"
 import { storage } from "../../storage/storageUtils"
 import "./style.scss"
 import { useSelector,useDispatch } from 'react-redux'
-import {focusTimeChange} from '../../redux/features/focusSlice'
+import {focusTimeChange,focusRecordAdd,focusHourAdd} from '../../redux/features/focusSlice'
+import moment from 'moment'
 
 export default function Float() {
   const focusTime=useSelector(store => store.focus.focusTime)
+  const focusRecord=useSelector(store => store.focus.focusRecord)
   const dispatch=useDispatch()
   const [clickBtn, setClickBtn] = useState(false)
   const [focusType,setFocusType] = useState('番茄计时')
@@ -16,6 +18,8 @@ export default function Float() {
   const [buttonText, setButtonText] = useState("开始")
   // 已专注的时间--秒
   const [time, setTime] = useState(0);
+  // 开始专注时间
+  const [startTime,setStartTime]=useState()
   const [interval, selectInterval] = useState(45);
   let h = parseInt(focusTime.substring(0, 2));
   let m = parseInt(focusTime.substring(4, 6));
@@ -27,12 +31,17 @@ export default function Float() {
   let timer=useRef()
 
   const handleClickFocus=(text)=>{
-    if(buttonText==='开始'||(buttonText==='继续'&&text==='继续')){
+    console.log(text)
+    if(buttonText==='开始'||(buttonText==='继续'&&text==='继 续')){
+      setStartTime(moment().format("HH:mm"))
       timer.current=setInterval(()=>{
         setTime(time=>time+1)
       },1000)
     }else if(buttonText==='暂停'){
       clearInterval(timer.current)
+      dispatch(focusRecordAdd({startTime:startTime,endTime:moment().format("HH:mm")}))
+      dispatch(focusHourAdd({hour:startTime.substring(0,2)*1,time:moment().format("mm")-startTime.substring(3)}))
+      setStartTime('')
     }else if(text==='结 束'){
       clearInterval(timer.current)
       if(time>=60){
@@ -44,11 +53,15 @@ export default function Float() {
           m=m+add
         }
         dispatch(focusTimeChange((h>9?h:'0'+h)+'h '+(m>9?m:'0'+m)+'m'))
+        if(startTime!==''){
+          dispatch(focusRecordAdd({startTime:startTime,endTime:moment().format("HH:mm")}))
+          dispatch(focusHourAdd({hour:startTime.substring(0,2)*1,time:moment().format("mm")-startTime.substring(3)}))
+        }
       }
       setTime(0)
     }
     setBeginFocus(!beginFocus)
-    if(buttonText==='开始'||(buttonText==='继续'&&text==='继续'))setButtonText('暂停')
+    if(buttonText==='开始'||(buttonText==='继续'&&text==='继 续'))setButtonText('暂停')
     else if(buttonText==='暂停')setButtonText('继续')
     else if(text==='结 束')setButtonText('开始')
   }
@@ -63,10 +76,11 @@ export default function Float() {
 
   useEffect(()=>{
     storage.setItem("focusTime", focusTime)
+    console.log('focusRecord',focusRecord)
   },[focusTime])
 
   useEffect(()=>{
-    if(time===interval*60){
+    if(focusType==='番茄计时'&&time===interval*60){
         message.success('番茄计时已完成')
         if(m+interval>=60){
             h=h+1
@@ -75,6 +89,8 @@ export default function Float() {
             m=m+interval
         }
         dispatch(focusTimeChange((h>9?h:'0'+h)+'h '+(m>9?m:'0'+m)+'m'))
+        dispatch(focusRecordAdd({startTime:startTime,endTime:moment().format("HH:mm")}))
+        dispatch(focusHourAdd({hour:startTime.substring(0,2)*1,time:moment().format("mm")-startTime.substring(3)}))
         setTime(0)
         setButtonText('开始')
         clearInterval(timer.current)
