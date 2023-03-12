@@ -3,11 +3,13 @@ import '../style.scss'
 import { Progress,Button,Slider,message } from 'antd';
 import { storage } from '../../../storage/storageUtils';
 import {useSelector,useDispatch} from 'react-redux'
-import {focusTimeChange} from '../../../redux/features/focusSlice'
+import {focusTimeChange,focusRecordAdd,focusHourAdd} from '../../../redux/features/focusSlice'
+import moment from 'moment'
 
 export default function Positive() {
   // 总的专注时间
   const focusTime=useSelector(store => store.focus.focusTime)
+  const focusRecord=useSelector(store => store.focus.focusRecord)
   const dispatch=useDispatch()
   // 是否开始专注标识
   const [beginFocus, setBeginFocus] = useState(false)
@@ -15,6 +17,8 @@ export default function Positive() {
   const [buttonText,setButtonText]=useState('开始')
   // 已专注的时间--秒
   const [time,setTime]=useState(0)
+  // 开始专注时间
+  const [startTime,setStartTime]=useState()
   let h=parseInt(focusTime.substring(0,2))
   let m=parseInt(focusTime.substring(4,6))
 
@@ -31,11 +35,15 @@ export default function Positive() {
   const handleClick=(text)=>{
     // console.log(text)
     if(buttonText==='开始'||(buttonText==='继续专注'&&text==='继续专注')){
+      setStartTime(moment().format("HH:mm"))
       timer.current=setInterval(()=>{
         setTime(time=>{return time+1})
       },1000)
     }else if(buttonText==='暂停'){
       clearInterval(timer.current)
+      dispatch(focusRecordAdd({startTime:startTime,endTime:moment().format("HH:mm")}))
+      dispatch(focusHourAdd({hour:startTime.substring(0,2)*1,time:moment().format("mm")-startTime.substring(3)}))
+      setStartTime('')
     }else if(text==='结 束'){
       clearInterval(timer.current)
       if(time>=60){
@@ -47,6 +55,10 @@ export default function Positive() {
           m=m+add
         }
         dispatch(focusTimeChange((h>9?h:'0'+h)+'h '+(m>9?m:'0'+m)+'m'))
+        if(startTime!==''){
+          dispatch(focusRecordAdd({startTime:startTime,endTime:moment().format("HH:mm")}))
+          dispatch(focusHourAdd({hour:startTime.substring(0,2)*1,time:moment().format("mm")-startTime.substring(3)}))
+        }
         // setFocusTime((h>9?h:'0'+h)+'h '+(m>9?m:'0'+m)+'m')
       }
       setTime(0)
@@ -59,6 +71,7 @@ export default function Positive() {
 
   useEffect(()=>{
     storage.setItem('focusTime',focusTime)
+    console.log('focusRecord',focusRecord)
   },[focusTime])
 
   const firstUpdate=useRef(true)
