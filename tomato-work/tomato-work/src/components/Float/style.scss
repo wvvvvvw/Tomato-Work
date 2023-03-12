@@ -1,0 +1,52 @@
+.float{
+    width: 40px;
+    height: 40px;
+    background-color:#1677ff;
+    right: 30px;
+    bottom: 30px;
+    position: fixed;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    border-radius: 50px;
+}
+
+.float-content{
+    width: 200px;
+    height: 200px;
+    right: 30px;
+    bottom: 90px;
+    position: fixed;
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid #d9d9d9;
+    .float-content-top{
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        border-bottom: 1px solid #f0f0f0;
+        padding: 10px 0;
+        .float-content-top-setTime,.float-content-top-btns{text-align: center}
+        .float-content-top-btns{
+            display: flex;
+            justify-content: space-around;
+            button{
+                width: 45px;
+                height: 30px;
+                font-size:1px;
+                text-align:center;
+                padding: 4px;
+            }
+        }
+    }
+    .float-content-bottom-text{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+}
